@@ -1,7 +1,6 @@
 const express = require("express");
 const axios= require('axios');
 
-const config = require("../config.json");
 const restaurantLogic=require("../business-logic-layer/restaurant-logic")
 
 
@@ -21,7 +20,7 @@ router.post("/:email", async (req, res) => {
             htmlContent: sentHtmlContent
         }, {
             headers: {
-                'api-key': config.brevo.api,
+                'api-key':process.env.BREVO_API,
                 'Content-Type': 'application/json'
             }
         });

@@ -6,7 +6,6 @@ const util = require("util");
 const verifyAsync = util.promisify(jwt.verify);
 const dal = require("../data-access-layer/dal");
 const crypto = require("crypto");
-const config = require("../config.json");
 
 
 async function loginAsync(credentials) {
@@ -20,8 +19,8 @@ async function loginAsync(credentials) {
     if (!user || user.length < 1) return null;
     delete user[0].password;
 
-    user[0].token = jwt.sign({ user: user[0] }, config.authSecrets.salt, { expiresIn: config.server.tokenExpiration });
-    user[0].refreshToken = jwt.sign({ user: user[0] }, config.authSecrets.refreshSalt, { expiresIn: config.server.refreshExpiration });
+    user[0].token = jwt.sign({ user: user[0] }, process.env.SALT, { expiresIn: process.env.TOKEN_EXP });
+    user[0].refreshToken = jwt.sign({ user: user[0] },process.env.REFRESH_SALT, { expiresIn: process.env.REFRESH_EXP});
     return user[0];
 };
 
@@ -35,15 +34,15 @@ async function registerAsync(user) {
     await dal.executeQueryAsync(sql, params);
     delete user.credentials;
     delete user.password;
-    user.token = jwt.sign({ user: user }, config.authSecrets.salt, { expiresIn: config.server.tokenExpiration });
-    user.refreshToken = jwt.sign({ user: user }, config.authSecrets.refreshSalt, { expiresIn: config.server.refreshExpiration });
+    user.token = jwt.sign({ user: user }, process.env.SALT, { expiresIn: process.env.TOKEN_EXP });
+    user.refreshToken = jwt.sign({ user: user }, process.env.REFRESH_SALT, { expiresIn: process.env.REFRESH_EXP});
     return user;
 };
 
 async function refreshTokenAsync(refreshToken) {
     try {
-        const decoded = await verifyAsync(refreshToken, config.authSecrets.refreshSalt);
-        const freshToken = jwt.sign({ user: decoded }, config.authSecrets.salt, { expiresIn: config.server.tokenExpiration });
+        const decoded = await verifyAsync(refreshToken, process.env.REFRESH_SALT);
+        const freshToken = jwt.sign({ user: decoded }, process.env.SALT, { expiresIn: process.env.TOKEN_EXP });
         return freshToken;
     } catch (error) {
         console.log(error)
@@ -107,7 +106,7 @@ async function sendOtpEmailAsync(email, name) {
             htmlContent: `<p>your verification code for Reservations app is: <strong>${otp}</strong></p>`
         }, {
             headers: {
-                'api-key': config.brevo.api,
+                'api-key': process.env.BREVO_API,
                 'Content-Type': 'application/json'
             }
         });
@@ -121,7 +120,7 @@ async function sendOtpEmailAsync(email, name) {
 
 function hash(plainText) {
     if (!plainText) return null;
-    return crypto.createHmac("sha512", config.authSecrets.hashSalt).update(plainText).digest("hex");
+    return crypto.createHmac("sha512", process.env.HASH_SALT).update(plainText).digest("hex");
 
 };
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const config = require("../config.json");
 
 const authLogic = require("../business-logic-layer/auth-logic");
 const verifyOtp =require("../middleware/verify-otp");
@@ -41,7 +40,7 @@ router.get("/otp/:email/:name", async (req, res) => {
         }
         const { data, otp, err } = await authLogic.sendOtpEmailAsync(email, name);
         if (err) return res.status(400).send(err);
-        const tokenOtp = jwt.sign({ otp }, config.authSecrets.otpSalt, { expiresIn: config.server.otpExpiration });
+        const tokenOtp = jwt.sign({ otp }, process.env.OTP_SALT, { expiresIn: process.env.OTP_EXP });
         const result = await authLogic.insertOtpAsync(email, tokenOtp)
         res.send({ result, data })
     } catch (error) {
@@ -80,17 +79,17 @@ router.post("/refresh", async (request, response) => {
         const { refreshToken } = request.body;
         if (!refreshToken) return response.status(400).send("Missing refresh token");
 
-        const decoded = jwt.verify(refreshToken, config.authSecrets.refreshSalt);
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SALT );
         
         const [user] = await authLogic.getUserAsync(decoded.user.uuid);
         if (!user) return response.status(401).send("User not found");
 
         const accessPayload = { user };
-        const token = jwt.sign(accessPayload, config.authSecrets.salt,
-            { expiresIn: config.server.tokenExpiration });
+        const token = jwt.sign(accessPayload, process.env.SALT,
+            { expiresIn: process.env.TOKEN_EXP });
         const newRefresh = jwt.sign({ user: { uuid: user.uuid } },
-            config.authSecrets.refreshSalt,
-            { expiresIn: config.server.refreshExpiration });
+           process.env.REFRESH_SALT,
+            { expiresIn: process.env.REFRESH_EXP });
         return response.send({ token, refreshToken: newRefresh });
     }
     catch (error) {

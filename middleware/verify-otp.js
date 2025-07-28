@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config.json");
 const dal = require("../data-access-layer/dal")
 
 async function verifyOtp(request, response, next) {
@@ -15,7 +14,7 @@ async function verifyOtp(request, response, next) {
 
         const code = res[0]?.code;
 
-        jwt.verify(code, config.authSecrets.otpSalt, (err, decoded) => {
+        jwt.verify(code, process.env.OTP_SALT, (err, decoded) => {
             
             if (err) {
                 console.log(err);

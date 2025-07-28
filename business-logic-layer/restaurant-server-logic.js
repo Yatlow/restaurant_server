@@ -1,4 +1,3 @@
-const config = require("../config.json");
 const restaurantLogic = require("../business-logic-layer/restaurant-logic");
 const tablesLogic = require("../business-logic-layer/tables-logic");
 
@@ -8,8 +7,8 @@ async function validateAsync(id, tableId, participants, date, location, phone, n
     const AllReservations = await restaurantLogic.getAllReservationsAsync();
     const tables = await tablesLogic.getAllTablesAsync();
     const errors = [];
-    const open = config.openingHours.open;
-    const close = config.openingHours.close;
+    const open = process.env.OPEN_HR;
+    const close = process.env.CLOSE_HR;
     const openTime = getTimeOnSameDay(reqDate, open);
     const closeTime = getTimeOnSameDay(reqDate, close);
     if (closeTime < openTime) {

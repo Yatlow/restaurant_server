@@ -1,17 +1,11 @@
 const db=require("mysql");
 
-// const pool=db.createPool({
-//     host: "localhost",
-//     user: "root",
-//     database: "restuarant",
-//     timezone: "utc"
-// });
 
 const pool=db.createPool({
     host: "gateway01.eu-central-1.prod.aws.tidbcloud.com",
     port:4000,
     user: "4EshFtTdZVSztCt.root",
-    password:"uTDwmc6PTnmbkp1Z",
+    password:process.env.DB_PASSWORD,
     database: "restaurant",
     timezone: "utc",
     ssl: {
