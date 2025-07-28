@@ -14,6 +14,9 @@ server.use("/restaurant", restaurantController);
 server.use("/tables", tablesController);
 server.use("/auth", authController);
 server.use("/email", emailController);
+server.get("/ping",(req,res)=>{
+    res.send("ping pong show:)")
+})
 
 server.use("*", (req, res) => {
     res.status(404).send(`Route not found ${req.originalUrl}`);
